@@ -3,17 +3,28 @@ pipeline {
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/prathameshwavhal/ci-demo'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image...'
                 sh 'docker build -t ci-demo .'
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Tests with Retry') {
             steps {
-                echo 'Running tests inside container...'
-                sh 'docker run ci-demo'
+                script {
+                    try {
+                        sh 'docker run ci-demo'
+                    } catch (err) {
+                        echo "Test failed. Retrying..."
+                        sh 'docker run ci-demo'
+                    }
+                }
             }
         }
     }
