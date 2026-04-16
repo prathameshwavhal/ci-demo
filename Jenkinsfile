@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/prathameshwavhal/ci-demo'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t ci-demo .'
