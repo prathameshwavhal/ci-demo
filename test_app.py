@@ -7,4 +7,4 @@ def test_fail():
     assert add(2, 2) == 4
 
 def test_bullshit():
-    assert add(2, 7) == 9
+    assert add(2, 7) == 55
