@@ -62,7 +62,7 @@ stage('Run Tests with Decision') {
                 }
                 else if (action == "reinstall") {
                     echo "Reinstalling..."
-                    sh 'pip install -r requirements.txt || true'
+                    sh 'pip3 install -r requirements.txt || true'
                 }
                 else if (action == "clean") {
                     echo "Cleaning..."
