@@ -48,6 +48,7 @@ pipeline {
 
                         echo "Attempt ${attempt}"
 
+                        sh 'docker build -t ci-demo .'
                         def status = sh(script: 'docker run ci-demo', returnStatus: true)
 
                         if (status == 0) {
