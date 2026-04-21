@@ -24,12 +24,11 @@
 //     }
 // }
 
-stage('Run Tests with Decision System') {
+stage('Run Tests with Decision') {
     steps {
         script {
 
             def maxAttempts = 3
-            def success = false
             def triedActions = []
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -41,43 +40,37 @@ stage('Run Tests with Decision System') {
                 def status = sh(script: 'docker run ci-demo', returnStatus: true)
 
                 if (status == 0) {
-                    echo "Pipeline succeeded"
-                    success = true
-                    break
+                    echo "✅ Success on attempt ${attempt}"
+                    return
                 }
 
-                echo "Pipeline failed"
+                echo "❌ Failed on attempt ${attempt}"
 
-                def failure_type = "test_failure"
-
+                // call python decision system
                 def action = sh(
-                    script: "python decision.py ${failure_type} ${triedActions.join(',')}",
+                    script: "python3 decision.py test_failure ${triedActions.join(',')}",
                     returnStdout: true
                 ).trim()
 
-                echo "Chosen action: ${action}"
+                echo "👉 Action chosen: ${action}"
 
                 triedActions.add(action)
 
+                // execute action
                 if (action == "retry") {
                     echo "Retrying..."
                 }
                 else if (action == "reinstall") {
-                    echo "Reinstalling dependencies..."
+                    echo "Reinstalling..."
                     sh 'pip install -r requirements.txt || true'
                 }
                 else if (action == "clean") {
-                    echo "Cleaning build..."
+                    echo "Cleaning..."
                     sh 'docker system prune -f'
                 }
-
-                writeFile file: "data_${attempt}.txt",
-                text: "${failure_type},${action},${status}"
             }
 
-            if (!success) {
-                error "Pipeline failed after ${maxAttempts} attempts"
-            }
+            error "🚨 Failed after ${maxAttempts} attempts"
         }
     }
 }
